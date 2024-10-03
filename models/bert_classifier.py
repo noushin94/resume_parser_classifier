@@ -1,5 +1,3 @@
-# models/bert_classifier.py
-
 import torch
 from transformers import BertForSequenceClassification
 
