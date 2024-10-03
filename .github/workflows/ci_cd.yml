@@ -1,0 +1,45 @@
+# .github/workflows/ci_cd.yml
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        python -m spacy download en_core_web_sm
+
+    - name: Run Tests
+      run: |
+        python -m unittest discover tests
+
+    - name: Build Docker Image
+      run: |
+        docker build -t resume_parser_classifier .
+
+    - name: Push to Docker Hub
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        push: true
+        tags: your_dockerhub_username/resume_parser_classifier:latest
+        secrets:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
